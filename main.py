@@ -10,7 +10,7 @@ from transformers import get_linear_schedule_with_warmup
 
 from src.metrics import Criterion
 from src.datasets import ContextualDataset
-from src.networks import IQIYModelLite, BERTAttentionsModel_v1
+from src.networks import IQIYModelLite, BERTAttentionsModel_v2
 from src.utils import plot_performance
 from src.train import do_train
 
@@ -20,8 +20,8 @@ cuda_master_id = CUDA_DEVICE_ID[0] if torch.cuda.is_available() and len(CUDA_DEV
 device = torch.device("cuda:{}".format(cuda_master_id) if torch.cuda.is_available() else "cpu") # master (or the only) gpu, unless no gpu
 # device = torch.device("cpu")' # force to use cpu
 
-EPOCHS = 1
-BATCH_SIZE = 8
+EPOCHS = 10
+BATCH_SIZE = 32
 LR = 1e-5
 WEIGHT_DACAY = 0.0
 WARMUP_PROPORTION = 0.0
@@ -29,7 +29,7 @@ WARM_UP_RATIO = 0
 LOSS_FUNC = 'BCE'
 LOG_STEP = 100 # aka validation step
 LEAST_ACCEPT_SCORE = 0.65
-TOY = True 
+TOY = False
 
 train_option = {
     'epochs': EPOCHS,
@@ -67,7 +67,7 @@ baseline = IQIYModelLite(n_classes=1, model_name=PRE_TRAINED_MODEL_PATH)
 #     baseline = nn.DataParallel(baseline, device_ids=CUDA_DEVICE)
 # baseline.to(device)
 # model = baseline
-proposed = BERTAttentionsModel_v1(n_classes=1, model_name=PRE_TRAINED_MODEL_PATH)
+proposed = BERTAttentionsModel_v2(n_classes=1, model_name=PRE_TRAINED_MODEL_PATH)
 if device != torch.device("cpu") and len(CUDA_DEVICE_ID) > 1:
     proposed = nn.DataParallel(proposed, device_ids=CUDA_DEVICE_ID)
 proposed.to(device)

@@ -13,7 +13,7 @@ def init_params(module_lst):
     return
 
 #当前文本与上下文的attention 加性模型
-class Attention(nn.Module):
+class Attention_v1(nn.Module):
     def __init__(self,input_dims):
         super().__init__()
 
@@ -43,6 +43,37 @@ class Attention(nn.Module):
     
         return A
 
+class Attention_v2(nn.Module):
+    def __init__(self,input_dims):
+        super().__init__()
+
+        #上下文对应的attention key矩阵
+        self.P_c=nn.Linear(input_dims,1) 
+
+        #当前上下文对应的attention key矩阵
+        self.P_r=nn.Linear(input_dims,1,bias=False) 
+
+        #激活函数
+        self.relu=nn.ReLU()
+
+        self.H=nn.Linear(128,1)
+
+        #attention归一化
+        self.softmax=nn.Softmax(dim=-1)
+
+        init_params([self.P_c,self.P_r,self.H])
+
+
+    def forward(self,contexts,current):
+
+        O=self.relu(self.P_c(contexts)+self.P_r(current))
+       
+        shape=O.shape
+        O=O.reshape(shape[:-1])
+        O=self.H(O)
+        A=self.softmax(O)
+    
+        return A
 
 
 #bert+每个情感对应一个attention
@@ -67,12 +98,12 @@ class BERTAttentionsModel_v1(nn.Module):
         )
 
         #不同情感使用不同attention
-        self.love_attention=Attention(dim)
-        self.joy_attention=Attention(dim)
-        self.fright_attention=Attention(dim)
-        self.anger_attention=Attention(dim)
-        self.fear_attention=Attention(dim)
-        self.sorrow_attention=Attention(dim)
+        self.love_attention=Attention_v1(dim)
+        self.joy_attention=Attention_v1(dim)
+        self.fright_attention=Attention_v1(dim)
+        self.anger_attention=Attention_v1(dim)
+        self.fear_attention=Attention_v1(dim)
+        self.sorrow_attention=Attention_v1(dim)
 
 
         #attention后接全连接层
@@ -168,6 +199,115 @@ class BERTAttentionsModel_v1(nn.Module):
             'love': love, 'joy': joy, 'fright': fright,
             'anger': anger, 'fear': fear, 'sorrow': sorrow,
         }
+    
+
+#bert+隐藏层attention+selfattention
+class BERTAttentionsModel_v2(nn.Module):
+    def __init__(self, n_classes, model_name):
+        super(BERTAttentionsModel_v2, self).__init__()
+        config = AutoConfig.from_pretrained(model_name)
+        config.update({"output_hidden_states": True,
+                       "hidden_dropout_prob": 0.0,
+                       "layer_norm_eps": 1e-7})
+
+        self.base = BertModel.from_pretrained(model_name, config=config)
+
+        self.dim = 1024 if 'large' in model_name else 768 #此时为768
+        dim=self.dim
+
+        self.attention = nn.Sequential(
+            nn.Linear(dim, 512),
+            nn.Tanh(),
+            nn.Linear(512, 1),
+            nn.Softmax(dim=1)
+        )
+
+        #不同情感使用不同attention
+        self.love_attention=Attention_v2(dim)
+        self.joy_attention=Attention_v2(dim)
+        self.fright_attention=Attention_v2(dim)
+        self.anger_attention=Attention_v2(dim)
+        self.fear_attention=Attention_v2(dim)
+        self.sorrow_attention=Attention_v2(dim)
+
+
+        #attention后接全连接层
+        self.out_love = nn.Sequential(
+            nn.Linear(dim, n_classes)
+        )
+        self.out_joy = nn.Sequential(
+            nn.Linear(dim, n_classes)
+        )
+        self.out_fright = nn.Sequential(
+            nn.Linear(dim, n_classes)
+        )
+        self.out_anger = nn.Sequential(
+            nn.Linear(dim, n_classes)
+        )
+        self.out_fear = nn.Sequential(
+            nn.Linear(dim, n_classes)
+        )
+        self.out_sorrow = nn.Sequential(
+            nn.Linear(dim, n_classes)
+        )
+
+        self.emotions=['love', 'joy', 'fright', 'anger', 'fear', 'sorrow']
+
+        init_params([self.out_love, self.out_joy, self.out_fright, self.out_anger,
+                     self.out_fear,  self.out_sorrow, self.attention])
+
+    def forward(self,input_tokens,attention_masks):
+        emotions=self.emotions
+        #所有文本bert输出的隐藏层  
+        shape=input_tokens.shape
+        input_tokens=input_tokens.reshape(-1,shape[-1])
+        attention_masks=attention_masks.reshape(-1,shape[-1])
+        #shape  128 768
+        roberta_output = self.base(input_ids=input_tokens,attention_mask=attention_masks)
+        # print(roberta_output)
+        # print(roberta_output.last_hidden_state.shape)
+        last_layer_hidden_states = roberta_output.hidden_states[-1] 
+        
+        # shape 4,7, 128, 768
+        last_layer_hidden_states=last_layer_hidden_states.reshape(shape[0],shape[1], 128, 768)
+        # print(f"last_layer_hidden_states 4,7, 128, 768 {last_layer_hidden_states.shape}")
+
+        #shape 4 128 768
+        current_hidden_states=last_layer_hidden_states[:,0,:,:]
+
+        #shape 4 6 128 768
+        context_hidden_states=last_layer_hidden_states[:,1:,:,:] if last_layer_hidden_states.shape[1]>1 else None
+
+        outputs={}
+        #shape 4 6 1
+        for emotion in emotions:
+            
+            if last_layer_hidden_states!=None:
+                attention=eval(f"self.{emotion}_attention")
+
+                weights=attention(context_hidden_states,current_hidden_states.reshape(shape[0],1,128,768))
+            
+                #shape 4 128 768
+                # print(weights.shape)
+                # print(weights.reshape((weights.shape[:],1)).shape)
+                # print(context_hidden_states.shape)
+                hidden_states= torch.sum(weights.reshape(*weights.shape,1)*context_hidden_states, dim=1)#shape(batchsize/gpu_num,768)
+                hidden_states+=current_hidden_states
+            else:
+                hidden_states=current_hidden_states
+
+            # shape 4 128 1
+            self_weights = self.attention(hidden_states)
+            # print(f"weights 4 7 128 1 {weights.shape}")
+    
+            #隐藏层向量自注意力后的向量 shape 4 768
+            vector = torch.sum(self_weights*hidden_states, dim=1)#shape(batchsize/gpu_num,768)
+            # print(f"vector 4 7 768 {vector.shape}")
+    
+            out=eval(f"self.out_{emotion}")
+            outputs[emotion]=out(vector)
+        
+        return outputs
     
 
 class IQIYModelLite(nn.Module):
