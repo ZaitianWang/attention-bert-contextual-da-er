@@ -46,6 +46,16 @@ def do_train(model, train_loader, valid_loader, optimizer, scheduler, criterion,
     train_checkpoint_performance = []
     valid_checkpoint_performance = []
     best_score = LEAST_ACCEPT_SCORE
+    best_performance = {
+        'bce': 0.0,
+        'rmse': 0.0,
+        'score': 0.0,
+        'acc': 0.0,
+        'precision': 0.0,
+        'recall': 0.0,
+        'f1': 0.0
+    }
+    best_epoch, best_batch_idx = 0, 0
     global_step = 0
     for epoch in range(EPOCHS):
         train_batches_performance = []
@@ -96,11 +106,13 @@ def do_train(model, train_loader, valid_loader, optimizer, scheduler, criterion,
                 # save best model
                 if avg_performance['score'] > best_score:
                     best_score = avg_performance['score']
+                    best_performance = avg_performance
+                    best_epoch, best_batch_idx = epoch, train_batch_idx
                     # name format: weights/{score}-{day}-{hour:min}-{epoch}-{batch_idx}.pt, score format: 0.0000
                     torch.save(model, 'weights/{:.4f}-{}-{}-{}-{}.pt'.format(best_score, time.strftime("%d", time.localtime()), time.strftime("%H%M", time.localtime()), epoch, train_batch_idx))
                     if TOY and len(valid_checkpoint_performance) > 1: # to see if code works; ignore/delete in final release
                         break # toy train, break after first best model is derived and at least two checkpoints for ploting
     logger.info('end training')
-    logger.info('best score: {} at epoch {} batch {}'.format(best_score, epoch, train_batch_idx))
-    logger.info('time elapsed: {}s'.format(time.time() - start_time))
+    logger.info('best score: {} at epoch {} batch {}, with acc {}, precision {}, recall {}, f1 {}'.format(best_score, best_epoch, best_batch_idx, best_performance['acc'], best_performance['precision'], best_performance['recall'], best_performance['f1']))
+    logger.info('time elapsed: {}min'.format((time.time()-start_time)/60))
     return train_checkpoint_performance, valid_checkpoint_performance
