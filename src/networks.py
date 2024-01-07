@@ -282,7 +282,7 @@ class BERTAttentionsModel_v2(nn.Module):
         #shape 4 6 1
         for emotion in emotions:
             
-            if last_layer_hidden_states!=None:
+            if context_hidden_states!=None:
                 attention=eval(f"self.{emotion}_attention")
 
                 weights=attention(context_hidden_states,current_hidden_states.reshape(shape[0],1,128,768))
