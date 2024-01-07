@@ -353,6 +353,8 @@ class IQIYModelLite(nn.Module):
                      self.out_fear,  self.out_sorrow, self.attention])
 
     def forward(self, input_ids, attention_mask):
+        input_ids=torch.squeeze(input_ids)
+        attention_mask=torch.squeeze(attention_mask)
         roberta_output = self.base(input_ids=input_ids,
                                    attention_mask=attention_mask)
 
