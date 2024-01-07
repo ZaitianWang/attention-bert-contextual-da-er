@@ -4,12 +4,12 @@ import time
 
 
 def plot_performance(train_checkpoint_performance, valid_checkpoint_performance):
+    # extract ['rmse', 'score', 'acc', 'precision', 'recall', 'f1']
+    train_checkpoint_performance = [{k: v for k, v in performance.items() if k in ['rmse', 'score', 'acc', 'precision', 'recall', 'f1']} for performance in train_checkpoint_performance]
+    valid_checkpoint_performance = [{k: v for k, v in performance.items() if k in ['rmse', 'score', 'acc', 'precision', 'recall', 'f1']} for performance in valid_checkpoint_performance]
     fig, axs = plt.subplots(2, 3)
     fig.tight_layout(pad=1.0)
     for i, k in enumerate(train_checkpoint_performance[0].keys()):
-        if k not in ['rmse', 'score', 'acc', 'precision', 'recall', 'f1']:
-            # ignore bce
-            continue
         train_performance = [performance[k] for performance in train_checkpoint_performance]
         valid_performance = [performance[k] for performance in valid_checkpoint_performance]
         axs[i//3][i%3].plot(train_performance, label='train')

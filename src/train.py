@@ -115,6 +115,6 @@ def do_train(model, train_loader, valid_loader, optimizer, scheduler, criterion,
                     if TOY and len(valid_checkpoint_performance) > 1: # to see if code works; ignore/delete in final release
                         break # toy train, break after first best model is derived and at least two checkpoints for ploting
     logger.info('end training')
-    logger.info('best score: {} at epoch {} batch {}, with acc {}, precision {}, recall {}, f1 {}'.format(best_score, best_epoch, best_batch_idx, best_performance['acc'], best_performance['precision'], best_performance['recall'], best_performance['f1']))
+    logger.info('best score: {:.4f} at epoch {} batch {}, with bce {:.4f}, rmse {:.4f}, acc {:.4f}, precision {:.4f}, recall {:.4f}, f1 {:.4f}'.format(best_score, best_epoch, best_batch_idx, best_performance['bce'], best_performance['rmse'], best_performance['acc'], best_performance['precision'], best_performance['recall'], best_performance['f1']))
     logger.info('time elapsed: {}min'.format((time.time()-start_time)/60))
     return train_checkpoint_performance, valid_checkpoint_performance
