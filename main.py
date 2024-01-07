@@ -70,9 +70,9 @@ valid_loader = DataLoader(valid_set, batch_size=BATCH_SIZE, shuffle=True)
 
 #使用basemodel
 baseline = IQIYModelLite(n_classes=1, model_name=PRE_TRAINED_MODEL_PATH)
-if device != torch.device("cpu") and len(CUDA_DEVICE_ID) > 1:
-    baseline = nn.DataParallel(baseline, device_ids=CUDA_DEVICE_ID)
-baseline.to(device)
+# if device != torch.device("cpu") and len(CUDA_DEVICE_ID) > 1:
+#     baseline = nn.DataParallel(baseline, device_ids=CUDA_DEVICE_ID)
+# baseline.to(device)
 # model = baseline
 
 proposed = BERTAttentionsModel_v2(n_classes=1, model_name=PRE_TRAINED_MODEL_PATH)
