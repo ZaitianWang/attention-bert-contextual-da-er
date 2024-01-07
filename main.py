@@ -21,15 +21,15 @@ device = torch.device("cuda:{}".format(cuda_master_id) if torch.cuda.is_availabl
 # device = torch.device("cpu")' # force to use cpu
 
 #超参数
-EPOCHS = 10
-BATCH_SIZE = 32
+EPOCHS = 5
+BATCH_SIZE = 16
 LR = 1e-5
 WEIGHT_DACAY = 0.0
 WARMUP_PROPORTION = 0.0
 WARM_UP_RATIO = 0
-LOSS_FUNC = 'BCE' #损失函数BCE
+LOSS_FUNC = 'BCE' # 损失函数BCE
 LOG_STEP = 100 # aka validation step（每100步验证一次）
-LEAST_ACCEPT_SCORE = 0.66 #最低接受分数
+LEAST_ACCEPT_SCORE = 0.66 # 最低接受分数
 TOY = False
 
 train_option = {
@@ -40,10 +40,12 @@ train_option = {
 }
 
 
-DATA_FILE_PATH = 'data/train_data.txt'
-LABEL_FILE_PATH = 'data/train_label.txt'
+# DATA_FILE_PATH = 'data/train_data.txt'
+# LABEL_FILE_PATH = 'data/train_label.txt'
+DATA_FILE_PATH = 'data/train_data_bt_2x.txt'
+LABEL_FILE_PATH = 'data/train_label_bt_2x.txt'
 MAX_LEN = 128
-context_len = 3#0-5可选
+context_len = 3 # 0-5可选
 
 #读数据
 with open(DATA_FILE_PATH,'r') as f:

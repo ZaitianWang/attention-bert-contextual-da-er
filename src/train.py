@@ -58,6 +58,8 @@ def do_train(model, train_loader, valid_loader, optimizer, scheduler, criterion,
     best_epoch, best_batch_idx = 0, 0
     global_step = 0
     for epoch in range(EPOCHS):
+        print(f'starting epoch {epoch+1}/{EPOCHS}')
+        logger.info(f'starting epoch {epoch+1}/{EPOCHS}')
         train_batches_performance = []
         for train_batch_idx, batch in enumerate(tqdm(train_loader)):
             # train part
