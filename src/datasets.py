@@ -82,9 +82,10 @@ class TestDataset(Dataset):
         indexs.extend(self.data['context'][index])
         encodings=[self.tokenizer.encode_plus(self.data['text'][idx],
                                             add_special_tokens=True,
+                                            truncation=True,
                                             max_length=self.max_len,
+                                            padding = 'max_length',
                                             return_token_type_ids=True,
-                                            pad_to_max_length=True,
                                             return_attention_mask=True,
                                             return_tensors='pt',) for idx in indexs]
         

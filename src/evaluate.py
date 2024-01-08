@@ -1,18 +1,15 @@
-import torch
-
 import pandas as pd
+
+import torch
 import numpy as np
 import torch.nn as nn
 
 from tqdm import tqdm
 from collections import defaultdict
-from networks import BERTAttentionsModel_v2
+from src.networks import BERTAttentionsModel_v2
+from src.datasets import TestDataset
 from transformers import  BertTokenizer
-from datasets import TestDataset
 from torch.utils.data import DataLoader
-
-import warnings
-warnings.filterwarnings('ignore')
 
 
 EPOCHS=5
