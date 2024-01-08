@@ -18,7 +18,7 @@ warnings.filterwarnings('ignore')
 EPOCHS=5
 sep=1
 #权重位置
-weight_path=r"./weights_base/0.7098-08-1300-3-2019.pt"
+weight_path=r"./weights/0.7098-08-1300-3-2019.pt"
 target_cols=['love', 'joy', 'fright', 'anger', 'fear', 'sorrow'] 
 model_path=r"./chinese-roberta-wwm-ext"
 batch_size=16
@@ -42,15 +42,15 @@ def predict(model, test_loader):
     return test_pred
 
 
-#创建dataloader
-def create_dataloader(dataset, batch_size, mode='train'):
-    shuffle = True if mode == 'train' else False
+# #创建dataloader
+# def create_dataloader(dataset, batch_size, mode='train'):
+#     shuffle = True if mode == 'train' else False
 
-    if mode == 'train':
-        data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
-    else:
-        data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
-    return data_loader
+#     if mode == 'train':
+#         data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+#     else:
+#         data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+#     return data_loader
 
 
 def evaluate(model):
@@ -61,7 +61,8 @@ def evaluate(model):
     #加载测试集
     tokenizer = BertTokenizer.from_pretrained(model_path)
     valset = TestDataset(tokenizer, max_len,sep, mode='test')
-    valid_loader = create_dataloader(valset, batch_size, mode='test')
+    # valid_loader = create_dataloader(valset, batch_size, mode='test')
+    valid_loader = DataLoader(valset, batch_size=batch_size, shuffle=False)
 
     #预测
     test_pred = predict(model, valid_loader)
