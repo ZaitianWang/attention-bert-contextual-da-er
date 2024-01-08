@@ -18,9 +18,9 @@ warnings.filterwarnings('ignore')
 EPOCHS=5
 sep=1
 #权重位置
-weight_path=r"/home/zhangweiliang/code/attention-bert-contextual-da-er/weights_base/0.7098-08-1300-3-2019.pt"
+weight_path=r"./weights_base/0.7098-08-1300-3-2019.pt"
 target_cols=['love', 'joy', 'fright', 'anger', 'fear', 'sorrow'] 
-model_path=r"/home/zhangweiliang/code/attention-bert-contextual-da-er/chinese-roberta-wwm-ext"
+model_path=r"./chinese-roberta-wwm-ext"
 batch_size=16
 max_len = 128
 
