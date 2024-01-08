@@ -67,7 +67,7 @@ def evaluate(model):
     test_pred = predict(model, valid_loader)
 
     #变为指定格式
-    index=pd.read_csv(f"data/test_processed_sep_{sep}_sorted.csv",sep='\t')['id']
+    index=pd.read_csv(r".\data\test_id.txt")['id']
     df1=pd.DataFrame(test_pred,index=index)
     arr=df1[target_cols].to_numpy()
     df1['emotion']=[",".join(map(str,r)) for r in arr]
