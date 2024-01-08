@@ -4,6 +4,10 @@ import os
 import torch
 from tqdm import tqdm
 
+'''
+@Author: Wang
+'''
+
 def load_config():
     with open('back_translation_config.yaml', 'r') as file:
         config = yaml.safe_load(file)
@@ -61,8 +65,6 @@ def back_translation():
     aug_data, aug_label = [], []
     batch_size = 16 # cuda memory usage: 26G
     print('Start translating...')
-    # new_aug_data_temp = []
-    # new_aug_label_temp = []
     for i in tqdm(range(0, len(emo_data), batch_size)):
         # all comments assume total data = 16000, batch_size = 32, context = 5, translation tracks = 3
         batch_samples = emo_data[i:i+batch_size] # 32
@@ -106,21 +108,13 @@ def back_translation():
         aug_data.extend(aug_batch_samples) # 3*32
         aug_label.extend(batch_labels) # 1*32
         aug_label.extend(batch_labels*(len(aug_batch_samples)//len(batch_labels))) # 3*32
-        # emo_data.extend(aug_batch_samples) # 16000 + 3*32*(16000//32) = 16000*4 = 64000
-        # emo_label.extend(batch_labels*(len(aug_batch_samples)//len(batch_labels))) # 64000
-        # new_aug_data_temp.extend(aug_batch_samples)
-        # new_aug_label_temp.extend(batch_labels*(len(aug_batch_samples)//len(batch_labels)))
-        # if i > 2:
-        #     break
     aug_label.extend(no_emo_label)
     aug_data.extend(no_emo_data)
     with open(f'data/train_data_bt_{fold}x.txt', 'w') as file:
         for item in aug_data:
-        # for item in new_aug_data_temp:
             file.write(str(item)+ '\n')
     with open(f'data/train_label_bt_{fold}x.txt', 'w') as file:
         for item in aug_label:
-        # for item in new_aug_label_temp:
             file.write(str(item)+ '\n')
 
 

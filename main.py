@@ -15,6 +15,9 @@ from src.utils import plot_performance
 from src.train import do_train
 from src.evaluate import do_evaluate
 
+'''
+@Author: Wang
+'''
 
 CUDA_DEVICE_ID = [4]
 cuda_master_id = CUDA_DEVICE_ID[0] if torch.cuda.is_available() and len(CUDA_DEVICE_ID) > 0 else None # first gpu, unless no gpu or forced to use cpu   

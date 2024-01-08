@@ -2,6 +2,9 @@
 import matplotlib.pyplot as plt
 import time
 
+'''
+@Author: Wang
+'''
 
 def plot_performance(train_checkpoint_performance, valid_checkpoint_performance):
     # extract ['rmse', 'score', 'acc', 'precision', 'recall', 'f1']

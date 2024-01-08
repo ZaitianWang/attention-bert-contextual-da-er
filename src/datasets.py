@@ -7,6 +7,10 @@ import torch
 import pandas as pd
 import numpy as np
 
+'''
+@Author: Huang, Zhang
+'''
+
 class ContextualDataset(Dataset):
     # def __init__(self, tokenizer, max_len, mode='train'):
     def __init__(self, data, label, tokenizer, max_len,context_len=5):

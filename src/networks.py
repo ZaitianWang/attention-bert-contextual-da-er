@@ -2,7 +2,9 @@ import torch
 import torch.nn as nn
 from transformers import BertPreTrainedModel, BertTokenizer, BertConfig, BertModel, AutoConfig
 
-#构建模型
+'''
+@Author: Zhang
+'''
 
 #参数初始化
 def init_params(module_lst):

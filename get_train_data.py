@@ -2,6 +2,10 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
+'''
+@Author: Huang
+'''
+
 def delete_files_in_folder(folder_path):
     #get all files
     file_list = os.listdir(folder_path)

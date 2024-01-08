@@ -1,13 +1,14 @@
 from src.metrics import get_avg_performance
 
-
 import torch
 from tqdm import tqdm
-
 
 import logging
 import time
 
+'''
+@Author: Wang
+'''
 
 def do_train(model, train_loader, valid_loader, optimizer, scheduler, criterion, device, train_option):
     EPOCHS = train_option['epochs']

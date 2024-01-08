@@ -3,6 +3,9 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import classification_report
 
+'''
+@Author: Wang
+'''
 
 class Criterion():
     def __init__(self, loss_fn='BCE'):
