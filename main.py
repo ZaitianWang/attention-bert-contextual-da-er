@@ -13,6 +13,7 @@ from src.datasets import ContextualDataset
 from src.networks import IQIYModelLite, BERTAttentionsModel_v2
 from src.utils import plot_performance
 from src.train import do_train
+from src.evaluate import do_evaluate
 
 
 CUDA_DEVICE_ID = [4]
@@ -32,6 +33,8 @@ LOG_STEP = 100 # aka validation step（每100步验证一次）
 LEAST_ACCEPT_SCORE = 0.66 # 最低接受分数
 TOY = False
 
+SUBMIT = False
+
 train_option = {
     'epochs': EPOCHS,
     'LOG_STEP': LOG_STEP,
@@ -45,7 +48,7 @@ train_option = {
 DATA_FILE_PATH = 'data/train_data_bt_2x.txt'
 LABEL_FILE_PATH = 'data/train_label_bt_2x.txt'
 MAX_LEN = 128
-context_len = 1 # 0-5可选
+CONTEXT_LEN = 1 # 0-5可选
 
 #读数据
 with open(DATA_FILE_PATH,'r') as f:
@@ -62,8 +65,8 @@ PRE_TRAINED_MODEL_PATH='./chinese-roberta-wwm-ext/'  # 'hfl/chinese-roberta-wwm-
 tokenizer = BertTokenizer.from_pretrained(PRE_TRAINED_MODEL_PATH)
 base_model = BertModel.from_pretrained(PRE_TRAINED_MODEL_PATH)  # 加载预训练模型
 
-train_set = ContextualDataset(train_data, train_label, tokenizer, MAX_LEN, context_len)
-valid_set = ContextualDataset(valid_data, valid_label, tokenizer, MAX_LEN, context_len)
+train_set = ContextualDataset(train_data, train_label, tokenizer, MAX_LEN, CONTEXT_LEN)
+valid_set = ContextualDataset(valid_data, valid_label, tokenizer, MAX_LEN, CONTEXT_LEN)
 train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True)
 valid_loader = DataLoader(valid_set, batch_size=BATCH_SIZE, shuffle=True)
 
@@ -91,3 +94,6 @@ scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=warm_up_
 train_checkpoint_performance, valid_checkpoint_performance = do_train(model, train_loader, valid_loader, optimizer, scheduler, criterion, device, train_option)
 
 plot_performance(train_checkpoint_performance, valid_checkpoint_performance)
+
+if SUBMIT:
+    do_evaluate(model)

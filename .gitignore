@@ -1,6 +1,8 @@
 test.ipynb
 chinese-roberta-wwm-ext/pytorch_model.bin
+Helsinki-NLP/*/
 log/*.log
+results/*.tsv
 vis_log/*.png
 weights/*.pt
 src/__pycache__/*

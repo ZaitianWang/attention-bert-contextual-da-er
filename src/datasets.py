@@ -75,9 +75,10 @@ class TestDataset(Dataset):
         samples=self.data[index]
         encodings=[self.tokenizer.encode_plus(s,
                                             add_special_tokens=True,
+                                            truncation=True,
                                             max_length=self.max_len,
+                                            padding = 'max_length',
                                             return_token_type_ids=True,
-                                            pad_to_max_length=True,
                                             return_attention_mask=True,
                                             return_tensors='pt',) for s in samples]
         
