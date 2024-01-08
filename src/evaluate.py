@@ -26,19 +26,24 @@ max_len = 128
 
 
 def predict(model, test_loader):
+    CUDA_DEVICE_ID = [4]
+    cuda_master_id = CUDA_DEVICE_ID[0] if torch.cuda.is_available() and len(CUDA_DEVICE_ID) > 0 else None # first gpu, unless no gpu or forced to use cpu   
+    device = torch.device("cuda:{}".format(cuda_master_id) if torch.cuda.is_available() else "cpu") # master (or the only) gpu, unless no gpu
+    # device = torch.device("cpu")' # force to use cpu
+    if device != torch.device("cpu") and len(CUDA_DEVICE_ID) > 1:
+        model = nn.DataParallel(model, device_ids=CUDA_DEVICE_ID)
+    model.to(device)
+    model.eval()
     val_loss = 0
     test_pred = defaultdict(list)
-    model.eval()
-    model.cuda()
-    for  batch in tqdm(test_loader):
-        b_input_ids = batch['input_tokens'].cuda()
-        attention_mask = batch["attention_mask"].cuda()
+    for batch in tqdm(test_loader):
+        b_input_ids = batch['input_tokens'].to(device)
+        attention_mask = batch["attention_mask"].to(device)
         with torch.no_grad():
             logists = model(b_input_ids, attention_mask)
             for col in target_cols:
                 out2 = logists[col].sigmoid().squeeze(1)*3.0
                 test_pred[col].extend(out2.cpu().numpy().tolist())
-
     return test_pred
 
 
@@ -53,7 +58,7 @@ def predict(model, test_loader):
 #     return data_loader
 
 
-def evaluate(model):
+def do_evaluate(model):
 
     #提交模板
     submit = pd.read_csv('data/submit_example.tsv', sep='\t')
@@ -76,13 +81,3 @@ def evaluate(model):
   
     #保存
     submit.to_csv(f'./results/baseline_BCE_epoch{EPOCHS}_sep{sep}_sorted_v2.tsv', sep='\t', index=False)
-
-if __name__=="__main__":
-
-    # model=torch.load(weight_path,m)
-    model=torch.load(weight_path)
-    model.cuda()
-
-    evaluate(model)
-    
-
